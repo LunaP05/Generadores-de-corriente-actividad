@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ejercicios Generadores Síncronos Trifásicos</title>
+  <style>
+    :root {
+      --header-bg: #0b240c;
+      --accent-green: #23743b;
+      --accent-green-hover: #1b5c2f;
+      --lime-border: #78be20;
+      --bg-card: #ffffff;
+      --sub-bg: #f1f5f9;
+      --border-color: #cbd5e1;
+      --text-main: #1e293b;
+      --text-muted: #475569;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 10px;
+      color: var(--text-main);
+    }
+
+    .card {
+      width: 100%;
+      max-width: 840px;
+      background: var(--bg-card);
+      border: 1.5px solid #94a3b8;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-header {
+      background: var(--header-bg);
+      color: #ffffff;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-header h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    .score-pill {
+      border: 1.5px solid var(--lime-border);
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 999px;
+      padding: 4px 16px;
+      text-align: center;
+      min-width: 105px;
+    }
+
+    .score-pill span {
+      display: block;
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: var(--lime-border);
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+
+    .score-pill strong {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .prompt-bar {
+      background: var(--sub-bg);
+      padding: 12px 20px;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.92rem;
+      line-height: 1.45;
+      color: var(--text-main);
+    }
+
+    .symbol-toolbar {
+      padding: 10px 20px;
+      background: #ffffff;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .symbol-toolbar small {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-right: 4px;
+      font-weight: 600;
+    }
+
+    .sym-btn {
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .sym-btn:hover {
+      background: #e2e8f0;
+      border-color: #94a3b8;
+    }
+
+    .sym-btn:active {
+      transform: scale(0.95);
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: #e2e8f0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .tab-btn {
+      border: none;
+      background: transparent;
+      padding: 11px 16px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .tab-btn.active {
+      background: #ffffff;
+      color: var(--accent-green);
+      border-bottom: 3px solid var(--accent-green);
+    }
+
+    .form-body {
+      padding: 18px 20px;
+      background: #ffffff;
+    }
+
+    .fields-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    @media (max-width: 720px) {
+      .fields-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 440px) {
+      .fields-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .field-group label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .field-group label sub {
+      font-size: 0.72rem;
+    }
+
+    .field-group input {
+      width: 100%;
+      padding: 9px 11px;
+      border: 1.5px solid var(--border-color);
+      border-radius: 7px;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    .field-group input:focus {
+      border-color: var(--accent-green);
+      box-shadow: 0 0 0 3px rgba(35, 116, 59, 0.12);
+    }
+
+    .field-group input.correct {
+      border-color: #16a34a;
+      background-color: #f0fdf4;
+      color: #14532d;
+      font-weight: 600;
+    }
+
+    .field-group input.incorrect {
+      border-color: #dc2626;
+      background-color: #fef2f2;
+      color: #7f1d1d;
+    }
+
+    .hint-msg {
+      font-size: 0.73rem;
+      min-height: 15px;
+      font-weight: 600;
+    }
+
+    .hint-msg.ok { color: #15803d; }
+    .hint-msg.err { color: #dc2626; }
+
+    .card-footer {
+      padding: 12px 20px;
+      background: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .feedback-banner {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-left: auto;
+    }
+
+    .btn-reset {
+      background: #e2e8f0;
+      color: #334155;
+      border: none;
+      border-radius: 7px;
+      padding: 9px 16px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+
+    .btn-reset:hover {
+      background: #cbd5e1;
+    }
+
+    .btn-verify {
+      background: var(--accent-green);
+      color: #ffffff;
+      border: none;
+      border-radius: 7px;
+      padding: 9px 18px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+
+    .btn-verify:hover {
+      background: var(--accent-green-hover);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-header">
+    <h1>Ejercicios: Generadores Síncronos Trifásicos</h1>
+    <div class="score-pill">
+      <span>TOTAL</span>
+      <strong id="scoreDisplay">0.0 / 5.0</strong>
+    </div>
+  </div>
+
+  <div id="promptText" class="prompt-bar">
+    <strong>Ejercicio 1:</strong> Se ensaya un generador síncrono trifásico conectado en Y de <strong>150 kVA, 400 V y 50 Hz</strong>. Para la corriente de campo nominal se obtienen: una tensión entre líneas en circuito abierto <strong>V<sub>T,CA</sub> = 450 V</strong> y una corriente de línea en cortocircuito <strong>I<sub>L,SC</sub> = 250 A</strong>. Al aplicar <strong>12 V</strong> de corriente continua entre dos de sus terminales, circula una corriente de <strong>30 A</strong>. Determine la resistencia de inducido (<strong>R<sub>A</sub></strong>), la tensión interna generada por fase (<strong>E<sub>A</sub></strong>), la impedancia síncrona (<strong>Z<sub>S</sub></strong>) y la reactancia síncrona (<strong>X<sub>S</sub></strong>).
+  </div>
+
+  <div class="symbol-toolbar">
+    <small>Insertar unidad:</small>
+    <button type="button" class="sym-btn" onmousedown="insertSymbol(event, ' Ω')">Ω</button>
+    <button type="button" class="sym-btn" onmousedown="insertSymbol(event, ' V')">V</button>
+  </div>
+
+  <div class="tabs">
+    <button type="button" id="tab1" class="tab-btn active" onclick="switchExercise(1)">Ejercicio 1 (150 kVA - 400 V)</button>
+    <button type="button" id="tab2" class="tab-btn" onclick="switchExercise(2)">Ejercicio 2 (300 kVA - 480 V)</button>
+  </div>
+
+  <!-- Formulario Ejercicio 1 -->
+  <div id="panel1" class="form-body">
+    <div class="fields-grid">
+      <div class="field-group">
+        <label>Resistencia de inducido (R<sub>A</sub>)</label>
+        <input type="text" data-ex="1" data-ans="0.200Ω|0.20Ω|0.2Ω" />
+        <div class="hint-msg"></div>
+      </div>
+
+      <div class="field-group">
+        <label>Voltaje generado por fase (E<sub>A</sub>)</label>
+        <input type="text" data-ex="1" data-ans="259.81V" />
+        <div class="hint-msg"></div>
+      </div>
+
+      <div class="field-group">
+        <label>Impedancia síncrona (Z<sub>S</sub>)</label>
+        <input type="text" data-ex="1" data-ans="1.039Ω|1.04Ω" />
+        <div class="hint-msg"></div>
+      </div>
+
+      <div class="field-group">
+        <label>Reactancia síncrona (X<sub>S</sub>)</label>
+        <input type="text" data-ex="1" data-ans="1.020Ω|1.02Ω" />
+        <div class="hint-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulario Ejercicio 2 -->
+  <div id="panel2" class="form-body hidden">
+    <div class="fields-grid">
+      <div class="field-group">
+        <label>Resistencia de inducido (R<sub>A</sub>)</label>
+        <input type="text" data-ex="2" data-ans="0.100Ω|0.10Ω|0.1Ω" />
+        <div class="hint-msg"></div>
+      </div>
+
+      <div class="field-group">
+        <label>Voltaje generado por fase (E<sub>A</sub>)</label>
+        <input type="text" data-ex="2" data-ans="300.22V" />
+        <div class="hint-msg"></div>
+      </div>
+
+      <div class="field-group">
+        <label>Impedancia síncrona (Z<sub>S</sub>)</label>
+        <input type="text" data-ex="2" data-ans="0.751Ω|0.75Ω" />
+        <div class="hint-msg"></div>
+      </div>
+
+      <div class="field-group">
+        <label>Reactancia síncrona (X<sub>S</sub>)</label>
+        <input type="text" data-ex="2" data-ans="0.744Ω|0.74Ω" />
+        <div class="hint-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-footer">
+    <div id="feedbackBanner" class="feedback-banner">Completa ambos ejercicios y presiona verificar.</div>
+    <div class="actions">
+      <button type="button" class="btn-reset" onclick="resetAll()">↻ Reiniciar</button>
+      <button type="button" class="btn-verify" onclick="verifyAnswers()">✔ Verificar Respuestas</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let activeInput = null;
+
+  const prompts = {
+    1: '<strong>Ejercicio 1:</strong> Se ensaya un generador síncrono trifásico conectado en Y de <strong>150 kVA, 400 V y 50 Hz</strong>. Para la corriente de campo nominal se obtienen: una tensión entre líneas en circuito abierto <strong>V<sub>T,CA</sub> = 450 V</strong> y una corriente de línea en cortocircuito <strong>I<sub>L,SC</sub> = 250 A</strong>. Al aplicar <strong>12 V</strong> de corriente continua entre dos de sus terminales, circula una corriente de <strong>30 A</strong>. Determine la resistencia de inducido (<strong>R<sub>A</sub></strong>), la tensión interna generada por fase (<strong>E<sub>A</sub></strong>), la impedancia síncrona (<strong>Z<sub>S</sub></strong>) y la reactancia síncrona (<strong>X<sub>S</sub></strong>).',
+    2: '<strong>Ejercicio 2:</strong> Un generador síncrono trifásico conectado en Y de <strong>300 kVA, 480 V y 60 Hz</strong> se somete a pruebas de caracterización. A corriente de excitación nominal, el voltaje de línea en vacío es <strong>V<sub>T,CA</sub> = 520 V</strong> y la corriente de línea en cortocircuito es <strong>I<sub>L,SC</sub> = 400 A</strong>. En la prueba de CD, al aplicar <strong>8 V</strong> entre dos terminales de la armadura, se mide una corriente de <strong>40 A</strong>. Calcule <strong>R<sub>A</sub></strong>, <strong>E<sub>A</sub></strong>, <strong>Z<sub>S</sub></strong> y <strong>X<sub>S</sub></strong>.'
+  };
+
+  document.querySelectorAll('input[type="text"]').forEach(inp => {
+    inp.addEventListener('focus', () => {
+      activeInput = inp;
+    });
+  });
+
+  function insertSymbol(e, symbol) {
+    e.preventDefault();
+    if (!activeInput) {
+      const visibleInputs = document.querySelectorAll('.form-body:not(.hidden) input');
+      if (visibleInputs.length) {
+        activeInput = visibleInputs[0];
+        activeInput.focus();
+      } else {
+        return;
+      }
+    }
+    const start = activeInput.selectionStart;
+    const end = activeInput.selectionEnd;
+    const val = activeInput.value;
+    activeInput.value = val.slice(0, start) + symbol + val.slice(end);
+    activeInput.selectionStart = activeInput.selectionEnd = start + symbol.length;
+    activeInput.focus();
+  }
+
+  function switchExercise(num) {
+    document.getElementById('tab1').classList.toggle('active', num === 1);
+    document.getElementById('tab2').classList.toggle('active', num === 2);
+    document.getElementById('panel1').classList.toggle('hidden', num !== 1);
+    document.getElementById('panel2').classList.toggle('hidden', num !== 2);
+    document.getElementById('promptText').innerHTML = prompts[num];
+
+    const firstVisible = document.querySelector(`#panel${num} input`);
+    if (firstVisible) activeInput = firstVisible;
+  }
+
+  function normalize(str) {
+    return str
+      .trim()
+      .replace(/\s+/g, '')
+      .replace(/,/g, '.')
+      .toUpperCase();
+  }
+
+  function verifyAnswers() {
+    const inputs = document.querySelectorAll('input[data-ans]');
+    let correctCount = 0;
+    const total = inputs.length;
+
+    inputs.forEach(inp => {
+      const userVal = normalize(inp.value);
+      const acceptedList = inp.dataset.ans.split('|');
+      const hint = inp.nextElementSibling;
+
+      inp.classList.remove('correct', 'incorrect');
+
+      if (userVal !== '' && acceptedList.includes(userVal)) {
+        inp.classList.add('correct');
+        hint.textContent = '✓ Correcto';
+        hint.className = 'hint-msg ok';
+        correctCount++;
+      } else {
+        inp.classList.add('incorrect');
+        hint.textContent = userVal === '' ? 'Campo vacío' : '✗ Revisa valor/unidad';
+        hint.className = 'hint-msg err';
+      }
+    });
+
+    const score = ((correctCount / total) * 5).toFixed(1);
+    document.getElementById('scoreDisplay').textContent = `${score} / 5.0`;
+
+    const banner = document.getElementById('feedbackBanner');
+    if (correctCount === total) {
+      banner.textContent = '¡Excelente! Todas las respuestas de ambos ejercicios son correctas.';
+      banner.style.color = '#15803d';
+    } else {
+      banner.textContent = `Llevas ${correctCount} de ${total} campos correctos entre ambos ejercicios.`;
+      banner.style.color = '#b45309';
+    }
+  }
+
+  function resetAll() {
+    document.querySelectorAll('input[data-ans]').forEach(inp => {
+      inp.value = '';
+      inp.classList.remove('correct', 'incorrect');
+      const hint = inp.nextElementSibling;
+      hint.textContent = '';
+      hint.className = 'hint-msg';
+    });
+    document.getElementById('scoreDisplay').textContent = '0.0 / 5.0';
+    const banner = document.getElementById('feedbackBanner');
+    banner.textContent = 'Completa ambos ejercicios y presiona verificar.';
+    banner.style.color = '#475569';
+  }
+</script>
+
+</body>
+</html>
